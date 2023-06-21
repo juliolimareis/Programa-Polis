@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  passwd    String
+  createdAt DateTime  @default(now())
+  status    Int
+  type      Int
+  secretaryId Int?
+  remoteAccess String?
+}
+
+model ticket {
+  id             Int              @id @default(autoincrement())
+  userId         Int
+  status         Int
+  subject        String
+  desc           String?
+  priority       Int?
+  createdAt      DateTime? @default(now()) @db.Timestamp(0)
+  ticketState    ticketState[]
+	@@map("ticket")
+}
+
+model ticketState {
+  id            Int       @id @default(autoincrement())
+  desc          String?   @db.VarChar(800)
+  userId        Int
+  ticketId      Int @map("ticketId")
+  createdAt     DateTime? @default(now()) @db.Timestamp(0)
+  ticket        ticket   @relation(fields: [ticketId], references: [id], onUpdate: Restrict, map: "ticket_FK_1")
+
+  @@index([ticketId], map: "ticket_FK_1")
+	@@map("ticketheldeskState")
+}
